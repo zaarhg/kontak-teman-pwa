@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tambah Orang</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b5cff">
+</head>
+<body data-page="tambah">
+  <h1>Tambah Orang</h1>
+
+  <form id="formTambah">
+    <label>Nama Lengkap (wajib)</label>
+    <input id="nama_lengkap" required>
+
+    <label>Alamat (wajib)</label>
+    <textarea id="alamat" required></textarea>
+
+    <label>No HP</label>
+    <input id="no_hp">
+
+    <label>Email</label>
+    <input id="email" type="email">
+
+    <label>Foto</label>
+    <input id="foto" type="file" accept="image/*">
+
+    <label>Catatan</label>
+    <textarea id="catatan"></textarea>
+
+    <button id="btnSubmit" type="submit">Simpan</button>
+  </form>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
+    }
+  </script>
+</body>
+</html>

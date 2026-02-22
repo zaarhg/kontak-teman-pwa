@@ -1,0 +1,11 @@
+body { font-family: Arial, sans-serif; padding: 16px; max-width: 720px; margin: 0 auto; }
+input, textarea, select, button { width: 100%; padding: 10px; margin: 6px 0 12px; box-sizing: border-box; }
+button { cursor: pointer; }
+.row { display:flex; justify-content: space-between; align-items:center; padding: 10px; border: 1px solid #ddd; border-radius: 10px; margin: 8px 0; gap: 10px; }
+.name { font-weight: 600; }
+.actions { display:flex; gap: 8px; }
+.actions button { width: auto; padding: 8px 10px; }
+.small { font-size: 12px; opacity: .8; }
+
+.modal { display:none; position: fixed; inset: 0; background: rgba(0,0,0,.35); padding: 16px; }
+.modal-content { background: #fff; border-radius: 12px; padding: 16px; max-width: 520px; margin: 60px auto; }

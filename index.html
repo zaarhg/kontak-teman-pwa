@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kontak Teman</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b5cff">
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <style>
+    .menu-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    .menu-card {
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+    }
+
+    .menu-card:hover {
+      background: #f5f8ff;
+      border-color: #0b5cff;
+    }
+
+    .menu-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .menu-desc {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .app-title {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .app-sub {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-title">Kontak Teman</div>
+  <div class="app-sub">Kelola data & bagikan dalam bentuk PDF</div>
+
+  <div class="menu-container">
+
+    <div class="menu-card" onclick="location.href='tambah.html'">
+      <div class="menu-title">➕ Tambah Orang</div>
+      <div class="menu-desc">
+        Masukkan data kontak baru beserta foto dan informasi lainnya.
+      </div>
+    </div>
+
+    <div class="menu-card" onclick="location.href='daftar.html'">
+      <div class="menu-title">📋 Daftar Orang</div>
+      <div class="menu-desc">
+        Lihat, edit, hapus, dan bagikan data dalam bentuk PDF.
+      </div>
+    </div>
+
+    <div class="menu-card" onclick="location.href='kop.html'">
+      <div class="menu-title">🧾 Kop Surat</div>
+      <div class="menu-desc">
+        Kelola daftar kop surat dan atur kop default.
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
+    }
+  </script>
+
+</body>
+</html>

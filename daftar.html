@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Daftar Orang</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b5cff">
+</head>
+<body data-page="daftar">
+  <h1>Daftar Orang</h1>
+  <input id="q" placeholder="Cari nama/alamat/no hp/email..." />
+  <div id="list"></div>
+
+  <!-- Share Modal -->
+  <div id="shareModal" class="modal">
+    <div class="modal-content">
+      <h3>Bagikan (PDF)</h3>
+
+      <label><input type="checkbox" id="withKop"> Pakai Kop Surat</label>
+      <select id="kopSelect"></select>
+
+      <hr/>
+      <div><b>Informasi yang dibagikan</b></div>
+
+      <label><input type="checkbox" name="fields" value="nama_lengkap" checked> Nama</label><br/>
+      <label><input type="checkbox" name="fields" value="foto" checked> Foto</label><br/>
+      <label><input type="checkbox" name="fields" value="no_hp" checked> No HP</label><br/>
+      <label><input type="checkbox" name="fields" value="alamat"> Alamat</label><br/>
+      <label><input type="checkbox" name="fields" value="email"> Email</label><br/>
+      <label><input type="checkbox" name="fields" value="catatan"> Catatan</label><br/>
+
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button id="shareRun">Buat & Dapatkan Link</button>
+        <button id="shareClose">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js");
+    }
+  </script>
+
+</body>
+</html>
