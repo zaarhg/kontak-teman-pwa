@@ -1,15 +1,9 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWhw3CkwTu5YuD09QDhKXJ3EO8nrkzbmie6wwT5VWOR_k9-XUr_Zppt6Qz8OZOoVz8/exec";
-const API_TOKEN = "KT_2026_02_22__z8Vq2nK9mP7aR4sT1xY6cD0fG3hJ5kL";
 const API_TIMEOUT_MS = 30000;
 
 function getScriptUrl() {
   const custom = (localStorage.getItem("script_url") || "").trim();
   return custom || SCRIPT_URL;
-}
-
-function getApiToken() {
-  const custom = (localStorage.getItem("api_token") || "").trim();
-  return custom || API_TOKEN;
 }
 
 function normalizeApiResponse(data, meta = {}) {
@@ -57,7 +51,6 @@ function timeoutSignal(ms = API_TIMEOUT_MS) {
 async function apiPost(action, payload = {}) {
   const body = new URLSearchParams();
   body.set("action", action);
-  body.set("token", getApiToken());
   body.set("session_token", localStorage.getItem("session_token") || "");
 
   Object.entries(payload).forEach(([k, v]) => {
