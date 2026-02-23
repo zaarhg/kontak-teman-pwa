@@ -1,44 +1,48 @@
 <!doctype html>
-<html>
+<html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Kontak Teman">
   <title>Kop Surat</title>
+
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icons/icon-512.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
-
 <body data-page="kop">
 
   <h2>Kop Surat</h2>
 
-  <div style="display:flex; gap:10px; margin:10px 0 16px;">
-    <button id="btnDefaultNoKop" type="button" style="width:auto;">
-      Jadikan Default: Tanpa Kop
-    </button>
-    <button type="button" onclick="location.href='index.html'" style="width:auto;">
-      Kembali
-    </button>
+  <div class="btn-row">
+    <button id="btnDefaultNoKop" type="button">Jadikan Default: Tanpa Kop</button>
+    <button id="btnBack" type="button" onclick="location.href='index.html'">Kembali</button>
   </div>
 
-  <div id="kopList" class="empty">Loading...</div>
-
-  <hr style="margin:18px 0;">
-
   <h3>Tambah Kop</h3>
-  <form id="formKop">
-    <label>Nama Instansi</label>
+  <form id="formKop" class="card">
+    <label for="nama_instansi">Nama Instansi</label>
     <input id="nama_instansi" placeholder="Contoh: Fakultas Teknik" required>
 
-    <label>Link Google Docs (Kop Surat)</label>
+    <label for="link_google_docs">Link Google Docs (Kop Surat)</label>
     <input id="link_google_docs" placeholder="https://docs.google.com/document/d/..." required>
 
     <button id="btnTambahKop" type="submit">Tambah Kop</button>
   </form>
 
-  <p class="small" style="opacity:.75;">
-    Catatan: gunakan margin Google Docs bawaan agar kop tidak terpotong (atas: 2.54 cm).
+  <p class="small">
+    Catatan: kop saat ini diambil sebagai teks. Upgrade kop full (logo/layout) kita bahas setelah ini.
   </p>
+
+  <hr>
+
+  <h3>Daftar Kop</h3>
+  <div id="kopList" class="empty">Loading...</div>
 
   <script src="assets/js/api.js"></script>
   <script src="assets/js/app.js"></script>

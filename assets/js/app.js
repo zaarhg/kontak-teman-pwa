@@ -11,25 +11,20 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "login") initLogin();
 });
 
-// =========================
-// UX SHELL: Toast + Loading
-// =========================
 function injectUxShell_() {
-  // Toast container
   if (!document.querySelector(".toast-wrap")) {
     const wrap = document.createElement("div");
     wrap.className = "toast-wrap";
     document.body.appendChild(wrap);
   }
 
-  // Loading overlay
   if (!document.querySelector(".loading-overlay")) {
     const ov = document.createElement("div");
     ov.className = "loading-overlay";
     ov.innerHTML = `
       <div class="loading-box">
         <div class="spinner"></div>
-        <div class="loading-text" style="font-size:13px;color:#333;">Memproses...</div>
+        <div class="loading-text">Memproses...</div>
       </div>
     `;
     document.body.appendChild(ov);
@@ -39,10 +34,12 @@ function injectUxShell_() {
 function setLoading(isOn, text = "Memproses...") {
   const ov = document.querySelector(".loading-overlay");
   if (!ov) return;
+
   const t = ov.querySelector(".loading-text");
   if (t) t.textContent = text;
 
   ov.style.display = isOn ? "flex" : "none";
+  document.body.style.overflow = isOn ? "hidden" : "";
 }
 
 function toast(type, title, msg, ttlMs = 2500) {
@@ -57,18 +54,23 @@ function toast(type, title, msg, ttlMs = 2500) {
       ${title ? `<div class="title">${esc(title)}</div>` : ""}
       <div>${esc(msg || "")}</div>
     </div>
-    <button class="x" aria-label="Close">✕</button>
+    <button class="x" type="button" aria-label="Close">✕</button>
   `;
 
-  el.querySelector(".x").addEventListener("click", () => el.remove());
-  wrap.appendChild(el);
+  let timer = setTimeout(removeToast, ttlMs);
 
-  const timer = setTimeout(() => {
+  function removeToast() {
     if (el && el.parentNode) el.remove();
-  }, ttlMs);
+  }
 
-  // stop auto remove on hover
+  el.querySelector(".x").addEventListener("click", removeToast);
   el.addEventListener("mouseenter", () => clearTimeout(timer));
+  el.addEventListener("mouseleave", () => {
+    clearTimeout(timer);
+    timer = setTimeout(removeToast, 1200);
+  });
+
+  wrap.appendChild(el);
 }
 
 function info(msg, title = "Info") { toast("info", title, msg); }
@@ -76,7 +78,6 @@ function ok(msg, title = "Berhasil") { toast("success", title, msg); }
 function warn(msg, title = "Perhatian") { toast("warn", title, msg, 3200); }
 function err(msg, title = "Gagal") { toast("error", title, msg, 3800); }
 
-// Wrapper for API calls with UX
 async function api(action, payload, loadingText = "Memproses...") {
   try {
     setLoading(true, loadingText);
@@ -85,7 +86,13 @@ async function api(action, payload, loadingText = "Memproses...") {
 
     if (!r || !r.ok) {
       if (r && r.error === "UNAUTHORIZED") {
-        err("Token salah / belum sesuai config. Cek API_TOKEN di api.js", "UNAUTHORIZED");
+        err("Sesi habis / token tidak sesuai. Silakan login ulang.", "UNAUTHORIZED");
+        if ((document.body.dataset.page || "") !== "login") {
+          setTimeout(() => {
+            const next = encodeURIComponent(location.pathname.split("/").pop() + location.search);
+            location.href = `login.html?next=${next}`;
+          }, 450);
+        }
       } else {
         err((r && (r.error || r.message)) ? String(r.error || r.message) : "Terjadi kesalahan.");
       }
@@ -98,7 +105,6 @@ async function api(action, payload, loadingText = "Memproses...") {
   }
 }
 
-// ---------- UTIL ----------
 function $(sel) { return document.querySelector(sel); }
 
 function esc(s) {
@@ -121,7 +127,6 @@ function readFileAsDataURL(file) {
   });
 }
 
-// Resize image before upload to reduce payload
 async function resizeImageToDataURL(file, maxSide = 900, quality = 0.75) {
   const imgURL = await readFileAsDataURL(file);
 
@@ -146,13 +151,9 @@ async function resizeImageToDataURL(file, maxSide = 900, quality = 0.75) {
 
   ctx.drawImage(img, 0, 0, width, height);
 
-  // always output jpeg to reduce size
   return canvas.toDataURL("image/jpeg", quality);
 }
 
-// ==================
-// PAGE: TAMBAH
-// ==================
 function initTambah() {
   const form = $("#formTambah");
   if (!form) return;
@@ -183,14 +184,17 @@ function initTambah() {
     }
 
     const btn = $("#btnSubmit");
-    if (btn) { btn.disabled = true; btn.textContent = "Menyimpan..."; }
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+    }
 
     const r = await api("contacts.add", {
       nama_lengkap,
       alamat,
       no_hp,
       email,
-      catatan, // label UI = Lain-lain (backend tetap pakai key catatan)
+      catatan,
       nama_alias,
       instansi_organisasi,
       jabatan,
@@ -200,90 +204,27 @@ function initTambah() {
       foto_data_url
     }, "Menyimpan data...");
 
-    if (btn) { btn.disabled = false; btn.textContent = "Simpan"; }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Simpan";
+    }
 
-    if (!r.ok) return;
+    if (!r?.ok) return;
 
     ok("Kontak berhasil ditambahkan.");
-    setTimeout(() => location.href = "daftar.html", 350);
+    setTimeout(() => { location.href = "daftar.html"; }, 350);
   });
 }
 
-// ==================
-// PAGE: DAFTAR
-// ==================
 function initDaftar() {
   const elList = $("#list");
   const elQ = $("#q");
   if (!elList) return;
 
-  // Defaults loaded from config.get
   let defaultShareFields = ["nama_lengkap", "foto", "no_hp"];
   let defaultKopId = "";
+  let currentShareId = "";
 
-  async function loadList(q = "") {
-    elList.innerHTML = "Loading...";
-    const r = await api("contacts.list", { q }, "Mengambil daftar...");
-    if (!r.ok) {
-      elList.innerHTML = `<div class="empty">Gagal memuat data.</div>`;
-      return;
-    }
-
-    if (!r.data || !r.data.length) {
-      elList.innerHTML = `<div class="empty">Belum ada data kontak.</div>`;
-      return;
-    }
-
-    elList.innerHTML = r.data.map((c) => `
-      <div class="row">
-        <div class="name">${esc(c.nama_lengkap)}</div>
-        <div class="actions">
-          <button data-act="edit" data-id="${esc(c.id)}">Edit</button>
-          <button data-act="del" data-id="${esc(c.id)}">Hapus</button>
-          <button data-act="share" data-id="${esc(c.id)}">Bagikan</button>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  // Search
-  if (elQ) {
-    let t = null;
-    elQ.addEventListener("input", () => {
-      clearTimeout(t);
-      t = setTimeout(() => loadList(elQ.value.trim()), 250);
-    });
-  }
-
-  // Action buttons
-  elList.addEventListener("click", async (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-
-    const id = btn.dataset.id;
-    const act = btn.dataset.act;
-
-    if (act === "edit") {
-      location.href = `edit.html?id=${encodeURIComponent(id)}`;
-      return;
-    }
-
-    if (act === "del") {
-      if (!confirm("Yakin hapus? (soft delete)")) return;
-      const r = await api("contacts.delete", { id }, "Menghapus...");
-      if (!r.ok) return;
-      ok("Kontak dihapus.");
-      await loadList(elQ ? elQ.value.trim() : "");
-      return;
-    }
-
-    if (act === "share") {
-      openShareModal(id);
-      return;
-    }
-  });
-
-  // ---- Share modal elements ----
   const shareModal = $("#shareModal");
   const shareClose = $("#shareClose");
   const shareRun = $("#shareRun");
@@ -291,54 +232,41 @@ function initDaftar() {
   const kopSelect = $("#kopSelect");
   const shareExtraNote = $("#shareExtraNote");
 
-  if (shareClose) shareClose.addEventListener("click", closeShareModal);
-  if (shareRun) shareRun.addEventListener("click", runShare);
-
-  // Load config + kop list once
-  (async () => {
-    // 1) load config defaults
-    const cfg = await api("config.get", {}, "Membaca konfigurasi...");
-    if (cfg.ok && cfg.data) {
-      defaultKopId = cfg.data.default_kop_id || "";
-      const f = (cfg.data.default_share_fields || "").trim();
-      if (f) defaultShareFields = f.split(",").map((x) => x.trim()).filter(Boolean);
+  async function loadList(q = "") {
+    elList.innerHTML = "Loading...";
+    const r = await api("contacts.list", { q }, "Mengambil daftar...");
+    if (!r?.ok) {
+      elList.innerHTML = `<div class="empty">Gagal memuat data.</div>`;
+      return;
     }
 
-    // 2) load kop list for dropdown
-    if (kopSelect) {
-      kopSelect.innerHTML = `<option value="">(Pilih kop)</option>`;
-      const r = await api("kop.list", {}, "Mengambil daftar kop...");
-      if (r.ok && r.data) {
-        r.data.forEach((k) => {
-          const opt = document.createElement("option");
-          opt.value = k.id;
-          opt.textContent = `${k.nama_instansi}`;
-          kopSelect.appendChild(opt);
-        });
-      }
-
-      // apply default kop selection
-      if (defaultKopId) {
-        if (withKop) withKop.checked = true;
-        kopSelect.value = defaultKopId;
-      } else {
-        if (withKop) withKop.checked = false;
-        kopSelect.value = "";
-      }
+    if (!Array.isArray(r.data) || !r.data.length) {
+      elList.innerHTML = `<div class="empty">Belum ada data kontak.</div>`;
+      return;
     }
-  })();
+
+    elList.innerHTML = r.data.map((c) => `
+      <div class="row">
+        <div>
+          <div class="name">${esc(c.nama_lengkap)}</div>
+          <div class="small">${esc(c.no_hp || c.email || c.alamat || "")}</div>
+        </div>
+        <div class="actions">
+          <button type="button" data-act="edit" data-id="${esc(c.id)}">Edit</button>
+          <button type="button" data-act="del" data-id="${esc(c.id)}">Hapus</button>
+          <button type="button" data-act="share" data-id="${esc(c.id)}">Bagikan</button>
+        </div>
+      </div>
+    `).join("");
+  }
 
   function applyDefaultFieldsToModal() {
     const boxes = Array.from(document.querySelectorAll('input[name="fields"]'));
     boxes.forEach((b) => { b.checked = defaultShareFields.includes(b.value); });
   }
 
-  let currentShareId = "";
-
   function openShareModal(id) {
     currentShareId = id;
-
-    // Apply defaults each time modal opens
     applyDefaultFieldsToModal();
 
     if (defaultKopId && kopSelect && withKop) {
@@ -350,26 +278,35 @@ function initDaftar() {
     }
 
     if (shareExtraNote) shareExtraNote.value = "";
-    if (shareModal) shareModal.style.display = "block";
+    if (shareModal) {
+      shareModal.style.display = "block";
+      document.body.style.overflow = "hidden";
+    }
   }
 
   function closeShareModal() {
     if (shareModal) shareModal.style.display = "none";
+    document.body.style.overflow = "";
     currentShareId = "";
   }
 
   async function runShare() {
     if (!currentShareId) return;
 
-    const useKop = withKop ? withKop.checked : false;
-    const kop_id = kopSelect ? kopSelect.value : "";
+    const useKop = !!(withKop && withKop.checked);
+    const kop_id = kopSelect ? (kopSelect.value || "") : "";
     if (useKop && !kop_id) return warn("Pilih kop dulu.");
 
     const fields = Array.from(document.querySelectorAll('input[name="fields"]:checked'))
       .map((x) => x.value)
       .join(",");
 
-    if (shareRun) { shareRun.disabled = true; shareRun.textContent = "Membuat PDF..."; }
+    if (!fields) return warn("Pilih minimal 1 informasi yang dibagikan.");
+
+    if (shareRun) {
+      shareRun.disabled = true;
+      shareRun.textContent = "Membuat PDF...";
+    }
 
     const extra_note = shareExtraNote ? shareExtraNote.value.trim() : "";
 
@@ -381,12 +318,15 @@ function initDaftar() {
       extra_note
     }, "Membuat PDF...");
 
-    if (shareRun) { shareRun.disabled = false; shareRun.textContent = "Buat & Dapatkan Link"; }
-    if (!r.ok) return;
+    if (shareRun) {
+      shareRun.disabled = false;
+      shareRun.textContent = "Buat & Dapatkan Link";
+    }
+
+    if (!r?.ok) return;
 
     closeShareModal();
 
-    // Bonus: auto-copy link
     if (r.pdf_url) {
       try {
         if (navigator.clipboard && window.isSecureContext) {
@@ -405,13 +345,88 @@ function initDaftar() {
     }
   }
 
-  // Initial list load
+  if (elQ) {
+    let t = null;
+    elQ.addEventListener("input", () => {
+      clearTimeout(t);
+      t = setTimeout(() => loadList(elQ.value.trim()), 250);
+    });
+  }
+
+  elList.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    const act = btn.dataset.act;
+
+    if (act === "edit") {
+      location.href = `edit.html?id=${encodeURIComponent(id)}`;
+      return;
+    }
+
+    if (act === "del") {
+      if (!confirm("Yakin hapus? (soft delete)")) return;
+      const r = await api("contacts.delete", { id }, "Menghapus...");
+      if (!r?.ok) return;
+      ok("Kontak dihapus.");
+      await loadList(elQ ? elQ.value.trim() : "");
+      return;
+    }
+
+    if (act === "share") {
+      openShareModal(id);
+    }
+  });
+
+  if (shareClose) shareClose.addEventListener("click", closeShareModal);
+  if (shareRun) shareRun.addEventListener("click", runShare);
+
+  if (shareModal) {
+    shareModal.addEventListener("click", (e) => {
+      if (e.target === shareModal) closeShareModal();
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && shareModal && shareModal.style.display === "block") {
+      closeShareModal();
+    }
+  });
+
+  (async () => {
+    const cfg = await api("config.get", {}, "Membaca konfigurasi...");
+    if (cfg?.ok && cfg.data) {
+      defaultKopId = cfg.data.default_kop_id || "";
+      const f = String(cfg.data.default_share_fields || "").trim();
+      if (f) defaultShareFields = f.split(",").map((x) => x.trim()).filter(Boolean);
+    }
+
+    if (kopSelect) {
+      kopSelect.innerHTML = `<option value="">(Pilih kop)</option>`;
+      const r = await api("kop.list", {}, "Mengambil daftar kop...");
+      if (r?.ok && Array.isArray(r.data)) {
+        r.data.forEach((k) => {
+          const opt = document.createElement("option");
+          opt.value = k.id;
+          opt.textContent = k.nama_instansi || "(Tanpa Nama)";
+          kopSelect.appendChild(opt);
+        });
+      }
+
+      if (defaultKopId) {
+        if (withKop) withKop.checked = true;
+        kopSelect.value = defaultKopId;
+      } else {
+        if (withKop) withKop.checked = false;
+        kopSelect.value = "";
+      }
+    }
+  })();
+
   loadList();
 }
 
-// ==================
-// PAGE: EDIT
-// ==================
 function initEdit() {
   const id = getQueryParam("id");
   if (!id) {
@@ -425,13 +440,13 @@ function initEdit() {
 
   async function load() {
     const r = await api("contacts.get", { id }, "Memuat data...");
-    if (!r.ok) {
+    if (!r?.ok) {
       warn("Data tidak ditemukan.");
       location.href = "daftar.html";
       return;
     }
 
-    const c = r.data;
+    const c = r.data || {};
     $("#id").value = c.id || "";
     $("#nama_lengkap").value = c.nama_lengkap || "";
     $("#alamat").value = c.alamat || "";
@@ -446,7 +461,13 @@ function initEdit() {
     $("#nik").value = c.nik || "";
 
     const prev = $("#fotoPreview");
-    if (prev) prev.textContent = c.foto_url ? `Foto tersimpan: ${c.foto_url}` : "Belum ada foto.";
+    if (prev) {
+      if (c.foto_url) {
+        prev.innerHTML = `Foto tersimpan: <a href="${esc(c.foto_url)}" target="_blank" rel="noopener">Lihat Foto</a>`;
+      } else {
+        prev.textContent = "Belum ada foto.";
+      }
+    }
   }
 
   form.addEventListener("submit", async (e) => {
@@ -457,7 +478,6 @@ function initEdit() {
     const no_hp = $("#no_hp")?.value.trim() || "";
     const email = $("#email")?.value.trim() || "";
     const catatan = $("#catatan")?.value.trim() || "";
-
     const nama_alias = $("#nama_alias")?.value.trim() || "";
     const instansi_organisasi = $("#instansi_organisasi")?.value.trim() || "";
     const jabatan = $("#jabatan")?.value.trim() || "";
@@ -476,7 +496,10 @@ function initEdit() {
     }
 
     const btn = $("#btnSubmit");
-    if (btn) { btn.disabled = true; btn.textContent = "Menyimpan..."; }
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+    }
 
     const r = await api("contacts.update", {
       id,
@@ -484,7 +507,7 @@ function initEdit() {
       alamat,
       no_hp,
       email,
-      catatan, // label UI = Lain-lain
+      catatan,
       nama_alias,
       instansi_organisasi,
       jabatan,
@@ -494,22 +517,22 @@ function initEdit() {
       foto_data_url
     }, "Menyimpan perubahan...");
 
-    if (btn) { btn.disabled = false; btn.textContent = "Simpan Perubahan"; }
-    if (!r.ok) return;
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Simpan Perubahan";
+    }
+    if (!r?.ok) return;
 
     ok("Perubahan disimpan.");
-    setTimeout(() => location.href = "daftar.html", 350);
+    setTimeout(() => { location.href = "daftar.html"; }, 350);
   });
 
   const back = $("#btnBack");
-  if (back) back.addEventListener("click", () => location.href = "daftar.html");
+  if (back) back.addEventListener("click", () => { location.href = "daftar.html"; });
 
   load();
 }
 
-// ==================
-// PAGE: KOP
-// ==================
 function initKop() {
   const elList = $("#kopList");
   const form = $("#formKop");
@@ -518,25 +541,27 @@ function initKop() {
   async function load() {
     elList.innerHTML = "Loading...";
     const r = await api("kop.list", {}, "Mengambil daftar kop...");
-    if (!r.ok) {
+    if (!r?.ok) {
       elList.innerHTML = `<div class="empty">Gagal memuat kop.</div>`;
       return;
     }
 
-    if (!r.data || !r.data.length) {
+    if (!Array.isArray(r.data) || !r.data.length) {
       elList.innerHTML = `<div class="empty">Belum ada kop surat.</div>`;
       return;
     }
 
     elList.innerHTML = r.data.map((k) => `
       <div class="row">
-        <div class="name">${esc(k.nama_instansi)}</div>
-        <div class="small">
-          <a href="${esc(k.link_google_docs)}" target="_blank">Buka Docs</a>
+        <div style="min-width:0;flex:1 1 auto;">
+          <div class="name">${esc(k.nama_instansi)}</div>
+          <div class="small">
+            <a href="${esc(k.link_google_docs)}" target="_blank" rel="noopener">Buka Docs</a>
+          </div>
         </div>
         <div class="actions">
-          <button data-act="default" data-id="${esc(k.id)}">Jadikan Default</button>
-          <button data-act="del" data-id="${esc(k.id)}">Hapus</button>
+          <button type="button" data-act="default" data-id="${esc(k.id)}">Jadikan Default</button>
+          <button type="button" data-act="del" data-id="${esc(k.id)}">Hapus</button>
         </div>
       </div>
     `).join("");
@@ -547,7 +572,7 @@ function initKop() {
     btnNo.addEventListener("click", async () => {
       if (!confirm("Jadikan default tanpa kop?")) return;
       const r = await api("kop.clearDefault", {}, "Menyetel default tanpa kop...");
-      if (!r.ok) return;
+      if (!r?.ok) return;
       ok("Default diubah: Tanpa Kop.");
       load();
     });
@@ -563,12 +588,19 @@ function initKop() {
     if (!link_google_docs) return warn("Link Google Docs wajib diisi.");
 
     const btn = $("#btnTambahKop");
-    if (btn) { btn.disabled = true; btn.textContent = "Menyimpan..."; }
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+    }
 
     const r = await api("kop.add", { nama_instansi, link_google_docs }, "Menyimpan kop...");
 
-    if (btn) { btn.disabled = false; btn.textContent = "Tambah Kop"; }
-    if (!r.ok) return;
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Tambah Kop";
+    }
+
+    if (!r?.ok) return;
 
     $("#nama_instansi").value = "";
     $("#link_google_docs").value = "";
@@ -585,7 +617,7 @@ function initKop() {
 
     if (act === "default") {
       const r = await api("kop.setDefault", { id }, "Menyetel default...");
-      if (!r.ok) return;
+      if (!r?.ok) return;
       ok("Kop default diset.");
       load();
       return;
@@ -594,10 +626,9 @@ function initKop() {
     if (act === "del") {
       if (!confirm("Hapus kop ini?")) return;
       const r = await api("kop.delete", { id }, "Menghapus kop...");
-      if (!r.ok) return;
+      if (!r?.ok) return;
       ok("Kop dihapus.");
       load();
-      return;
     }
   });
 
@@ -612,22 +643,22 @@ function initStatus() {
   async function render() {
     if (box) box.textContent = "Loading...";
     const r = await api("stats.get", {}, "Mengambil statistik...");
-    if (!r.ok) {
+    if (!r?.ok) {
       if (box) box.innerHTML = `<div class="empty">Gagal memuat statistik.</div>`;
       return;
     }
 
-    const d = r.data;
+    const d = r.data || {};
     if (box) {
       box.innerHTML = `
-        <div class="row"><div class="name">Kontak aktif</div><div>${d.contacts_active}</div></div>
-        <div class="row"><div class="name">Kop aktif</div><div>${d.kop_active}</div></div>
-        <div class="row"><div class="name">PDF hari ini</div><div>${d.pdf_today}</div></div>
-        <div class="row"><div class="name">PDF 7 hari</div><div>${d.pdf_last7}</div></div>
-        <div class="row"><div class="name">Error 7 hari</div><div>${d.errors_last7}</div></div>
-        <div class="row"><div class="name">Rate limit 7 hari</div><div>${d.rate_limit_last7}</div></div>
-        <div class="row"><div class="name">Unauthorized 7 hari</div><div>${d.unauthorized_last7}</div></div>
-        <div class="small">Timezone server: ${esc(d.tz)}</div>
+        <div class="row"><div class="name">Kontak aktif</div><div>${esc(d.contacts_active ?? 0)}</div></div>
+        <div class="row"><div class="name">Kop aktif</div><div>${esc(d.kop_active ?? 0)}</div></div>
+        <div class="row"><div class="name">PDF hari ini</div><div>${esc(d.pdf_today ?? 0)}</div></div>
+        <div class="row"><div class="name">PDF 7 hari</div><div>${esc(d.pdf_last7 ?? 0)}</div></div>
+        <div class="row"><div class="name">Error 7 hari</div><div>${esc(d.errors_last7 ?? 0)}</div></div>
+        <div class="row"><div class="name">Rate limit 7 hari</div><div>${esc(d.rate_limit_last7 ?? 0)}</div></div>
+        <div class="row"><div class="name">Unauthorized 7 hari</div><div>${esc(d.unauthorized_last7 ?? 0)}</div></div>
+        <div class="small">Timezone server: ${esc(d.tz || "-")}</div>
       `;
     }
   }
@@ -640,9 +671,9 @@ function initStatus() {
       if (!confirm(`Cleanup PDF lebih tua dari ${days} hari?`)) return;
 
       const r = await api("maintenance.cleanupPdfs", { days_old: days }, "Cleanup PDF...");
-      if (!r.ok) return;
+      if (!r?.ok) return;
 
-      ok(`Cleanup selesai. Files ditrash: ${r.data.trashed}`);
+      ok(`Cleanup selesai. Files ditrash: ${r?.data?.trashed ?? 0}`);
       render();
     });
   }
@@ -662,7 +693,7 @@ function guardLogin_() {
 }
 
 function initLogin() {
-  const form = document.querySelector("#formLogin");
+  const form = $("#formLogin");
   if (!form) return;
 
   const next = new URL(location.href).searchParams.get("next") || "index.html";
@@ -670,15 +701,37 @@ function initLogin() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const pin = document.querySelector("#pin").value.trim();
-    const r = await apiPost("auth.login", { pin });
+    const pinEl = $("#pin");
+    const pin = pinEl?.value.trim() || "";
+    if (!pin) return warn("PIN wajib diisi.");
 
-    if (!r.ok) {
-      alert("PIN salah.");
+    const btn = $("#btnLogin");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Masuk...";
+    }
+
+    setLoading(true, "Login...");
+    let r;
+    try {
+      r = await apiPost("auth.login", { pin });
+    } catch (e2) {
+      r = { ok: false, error: "CLIENT_ERROR", message: String(e2?.message || e2) };
+    }
+    setLoading(false);
+
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Masuk";
+    }
+
+    if (!r?.ok || !r?.data?.session_token) {
+      err("PIN salah atau server tidak merespons.");
       return;
     }
 
     localStorage.setItem("session_token", r.data.session_token);
-    location.href = next;
+    ok("Login berhasil.");
+    setTimeout(() => { location.href = next; }, 200);
   });
 }

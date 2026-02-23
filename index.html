@@ -1,70 +1,27 @@
 <!doctype html>
-<html>
+<html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Kontak Teman">
   <title>Kontak Teman</title>
 
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b5cff">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icons/icon-512.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+
   <link rel="stylesheet" href="assets/css/style.css">
-
-  <style>
-    .menu-container {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 40px;
-    }
-
-    .menu-card {
-      padding: 20px;
-      border-radius: 14px;
-      border: 1px solid #ddd;
-      cursor: pointer;
-      transition: 0.2s;
-      text-align: center;
-    }
-
-    .menu-card:hover {
-      background: #f5f8ff;
-      border-color: #0b5cff;
-    }
-
-    .menu-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .menu-desc {
-      font-size: 13px;
-      color: #666;
-    }
-
-    .app-title {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 22px;
-      font-weight: 700;
-    }
-
-    .app-sub {
-      text-align: center;
-      font-size: 13px;
-      color: #777;
-      margin-top: 4px;
-    }
-  </style>
 </head>
-
-<body>
+<body data-page="index">
 
   <div class="app-title">Kontak Teman</div>
   <div class="app-sub">Kelola data & bagikan dalam bentuk PDF</div>
 
   <div class="menu-container">
-
     <div class="menu-card" onclick="location.href='tambah.html'">
       <div class="menu-title">➕ Tambah Orang</div>
       <div class="menu-desc">
@@ -87,12 +44,11 @@
     </div>
 
     <div class="menu-card" onclick="location.href='status.html'">
-        <div class="menu-title">📊 Status</div>
-        <div class="menu-desc">
+      <div class="menu-title">📊 Status</div>
+      <div class="menu-desc">
         Statistik pemakaian, log, dan maintenance sederhana.
-        </div>
+      </div>
     </div>
-
   </div>
 
   <script>

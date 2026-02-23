@@ -1,55 +1,63 @@
 <!doctype html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Kontak Teman">
   <title>Tambah Orang</title>
+
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icons/icon-512.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b5cff">
 </head>
 <body data-page="tambah">
   <h1>Tambah Orang</h1>
 
+  <div class="btn-row">
+    <button id="btnBack" type="button" onclick="location.href='index.html'">Kembali</button>
+  </div>
+
   <form id="formTambah">
-    <!-- WAJIB / IDENTITAS INTI -->
-    <label>Nama Lengkap (wajib)</label>
+    <label for="nama_lengkap">Nama Lengkap (wajib)</label>
     <input id="nama_lengkap" required>
 
-    <label>Alamat (wajib)</label>
+    <label for="alamat">Alamat (wajib)</label>
     <textarea id="alamat" required></textarea>
 
-    <!-- KONTAK -->
-    <label>No HP</label>
+    <label for="no_hp">No HP</label>
     <input id="no_hp">
 
-    <label>Email</label>
+    <label for="email">Email</label>
     <input id="email" type="email">
 
-    <label>Foto</label>
+    <label for="foto">Foto</label>
     <input id="foto" type="file" accept="image/*">
 
-    <!-- DETAIL TAMBAHAN (OPSIONAL) -->
-    <label>Nama alias</label>
+    <label for="nama_alias">Nama alias</label>
     <input id="nama_alias">
 
-    <label>Instansi / Organisasi</label>
+    <label for="instansi_organisasi">Instansi / Organisasi</label>
     <input id="instansi_organisasi">
 
-    <label>Jabatan</label>
+    <label for="jabatan">Jabatan</label>
     <input id="jabatan">
 
-    <label>Tanggal lahir</label>
+    <label for="tanggal_lahir">Tanggal lahir</label>
     <input id="tanggal_lahir" type="date">
 
-    <label>Domisili</label>
+    <label for="domisili">Domisili</label>
     <input id="domisili">
 
-    <label>NIK</label>
+    <label for="nik">NIK</label>
     <input id="nik" inputmode="numeric" maxlength="32" placeholder="Opsional">
 
-    <!-- KETERANGAN -->
-    <label>Lain-lain</label>
+    <label for="catatan">Lain-lain</label>
     <textarea id="catatan"></textarea>
 
     <button id="btnSubmit" type="submit">Simpan</button>
