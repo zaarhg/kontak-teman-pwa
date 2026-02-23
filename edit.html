@@ -14,12 +14,14 @@
   <form id="formEdit">
     <input id="id" disabled>
 
+    <!-- WAJIB / IDENTITAS INTI -->
     <label>Nama Lengkap (wajib)</label>
     <input id="nama_lengkap" required>
 
     <label>Alamat (wajib)</label>
     <textarea id="alamat" required></textarea>
 
+    <!-- KONTAK -->
     <label>No HP</label>
     <input id="no_hp">
 
@@ -30,7 +32,27 @@
     <input id="foto" type="file" accept="image/*">
     <div id="fotoPreview" style="font-size:12px;"></div>
 
-    <label>Catatan</label>
+    <!-- DETAIL TAMBAHAN (OPSIONAL) -->
+    <label>Nama alias</label>
+    <input id="nama_alias">
+
+    <label>Instansi / Organisasi</label>
+    <input id="instansi_organisasi">
+
+    <label>Jabatan</label>
+    <input id="jabatan">
+
+    <label>Tanggal lahir</label>
+    <input id="tanggal_lahir" type="date">
+
+    <label>Domisili</label>
+    <input id="domisili">
+
+    <label>NIK</label>
+    <input id="nik" inputmode="numeric" maxlength="32" placeholder="Opsional">
+
+    <!-- KETERANGAN -->
+    <label>Lain-lain</label>
     <textarea id="catatan"></textarea>
 
     <div style="display:flex; gap:8px; margin-top:10px;">
@@ -47,6 +69,5 @@
       navigator.serviceWorker.register("./service-worker.js");
     }
   </script>
-
 </body>
 </html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Status</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="status">
+
+  <h2>Status Sistem</h2>
+  <div id="statsBox" class="empty">Loading...</div>
+
+  <div style="margin-top:14px;">
+    <button id="btnRefresh">Refresh</button>
+  </div>
+
+  <hr style="margin:18px 0;">
+
+  <h3>Maintenance</h3>
+  <p class="small">Cleanup akan memindahkan PDF lama ke Trash (aman).</p>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <input id="daysOld" type="number" value="30" min="1" style="width:140px;">
+    <button id="btnCleanup" style="width:auto;">Cleanup PDF</button>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

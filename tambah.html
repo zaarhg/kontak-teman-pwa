@@ -12,12 +12,14 @@
   <h1>Tambah Orang</h1>
 
   <form id="formTambah">
+    <!-- WAJIB / IDENTITAS INTI -->
     <label>Nama Lengkap (wajib)</label>
     <input id="nama_lengkap" required>
 
     <label>Alamat (wajib)</label>
     <textarea id="alamat" required></textarea>
 
+    <!-- KONTAK -->
     <label>No HP</label>
     <input id="no_hp">
 
@@ -27,7 +29,27 @@
     <label>Foto</label>
     <input id="foto" type="file" accept="image/*">
 
-    <label>Catatan</label>
+    <!-- DETAIL TAMBAHAN (OPSIONAL) -->
+    <label>Nama alias</label>
+    <input id="nama_alias">
+
+    <label>Instansi / Organisasi</label>
+    <input id="instansi_organisasi">
+
+    <label>Jabatan</label>
+    <input id="jabatan">
+
+    <label>Tanggal lahir</label>
+    <input id="tanggal_lahir" type="date">
+
+    <label>Domisili</label>
+    <input id="domisili">
+
+    <label>NIK</label>
+    <input id="nik" inputmode="numeric" maxlength="32" placeholder="Opsional">
+
+    <!-- KETERANGAN -->
+    <label>Lain-lain</label>
     <textarea id="catatan"></textarea>
 
     <button id="btnSubmit" type="submit">Simpan</button>

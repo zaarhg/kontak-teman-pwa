@@ -24,12 +24,34 @@
       <hr/>
       <div><b>Informasi yang dibagikan</b></div>
 
+      <!-- default tetap seperti sekarang -->
       <label><input type="checkbox" name="fields" value="nama_lengkap" checked> Nama</label><br/>
       <label><input type="checkbox" name="fields" value="foto" checked> Foto</label><br/>
       <label><input type="checkbox" name="fields" value="no_hp" checked> No HP</label><br/>
+
+      <!-- opsional lama -->
       <label><input type="checkbox" name="fields" value="alamat"> Alamat</label><br/>
       <label><input type="checkbox" name="fields" value="email"> Email</label><br/>
-      <label><input type="checkbox" name="fields" value="catatan"> Catatan</label><br/>
+      <label><input type="checkbox" name="fields" value="catatan"> Lain-lain</label><br/>
+
+      <!-- opsi baru (semua opsional / tidak auto-centang) -->
+      <label><input type="checkbox" name="fields" value="nama_alias"> Nama alias</label><br/>
+      <label><input type="checkbox" name="fields" value="instansi_organisasi"> Instansi / Organisasi</label><br/>
+      <label><input type="checkbox" name="fields" value="jabatan"> Jabatan</label><br/>
+      <label><input type="checkbox" name="fields" value="tanggal_lahir"> Tanggal lahir</label><br/>
+      <label><input type="checkbox" name="fields" value="domisili"> Domisili</label><br/>
+      <label><input type="checkbox" name="fields" value="nik"> NIK</label><br/>
+
+      <!-- Catatan tambahan khusus PDF (opsional, tidak tersimpan ke data kontak) -->
+      <div style="margin-top:12px;">
+        <label for="shareExtraNote"><b>Catatan tambahan untuk PDF (opsional)</b></label>
+        <textarea
+          id="shareExtraNote"
+          rows="3"
+          placeholder="Contoh: Kontak panitia acara / aktif WA / perlu follow up minggu depan"
+          style="width:100%; box-sizing:border-box; margin-top:6px;"
+        ></textarea>
+      </div>
 
       <div style="margin-top:12px; display:flex; gap:8px;">
         <button id="shareRun">Buat & Dapatkan Link</button>
@@ -46,6 +68,5 @@
       navigator.serviceWorker.register("./service-worker.js");
     }
   </script>
-
 </body>
 </html>

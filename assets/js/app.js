@@ -1,11 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
   injectUxShell_();
+  guardLogin_();
 
   const page = document.body.dataset.page || "";
   if (page === "tambah") initTambah();
   if (page === "daftar") initDaftar();
   if (page === "edit") initEdit();
   if (page === "kop") initKop();
+  if (page === "status") initStatus();
+  if (page === "login") initLogin();
 });
 
 // =========================
@@ -162,6 +165,12 @@ function initTambah() {
     const no_hp = $("#no_hp")?.value.trim() || "";
     const email = $("#email")?.value.trim() || "";
     const catatan = $("#catatan")?.value.trim() || "";
+    const nama_alias = $("#nama_alias")?.value.trim() || "";
+    const instansi_organisasi = $("#instansi_organisasi")?.value.trim() || "";
+    const jabatan = $("#jabatan")?.value.trim() || "";
+    const tanggal_lahir = $("#tanggal_lahir")?.value || "";
+    const domisili = $("#domisili")?.value.trim() || "";
+    const nik = $("#nik")?.value.trim() || "";
 
     if (!nama_lengkap) return warn("Nama lengkap wajib diisi.");
     if (!alamat) return warn("Alamat wajib diisi.");
@@ -177,7 +186,18 @@ function initTambah() {
     if (btn) { btn.disabled = true; btn.textContent = "Menyimpan..."; }
 
     const r = await api("contacts.add", {
-      nama_lengkap, alamat, no_hp, email, catatan, foto_data_url
+      nama_lengkap,
+      alamat,
+      no_hp,
+      email,
+      catatan, // label UI = Lain-lain (backend tetap pakai key catatan)
+      nama_alias,
+      instansi_organisasi,
+      jabatan,
+      tanggal_lahir,
+      domisili,
+      nik,
+      foto_data_url
     }, "Menyimpan data...");
 
     if (btn) { btn.disabled = false; btn.textContent = "Simpan"; }
@@ -269,6 +289,7 @@ function initDaftar() {
   const shareRun = $("#shareRun");
   const withKop = $("#withKop");
   const kopSelect = $("#kopSelect");
+  const shareExtraNote = $("#shareExtraNote");
 
   if (shareClose) shareClose.addEventListener("click", closeShareModal);
   if (shareRun) shareRun.addEventListener("click", runShare);
@@ -328,6 +349,7 @@ function initDaftar() {
       kopSelect.value = "";
     }
 
+    if (shareExtraNote) shareExtraNote.value = "";
     if (shareModal) shareModal.style.display = "block";
   }
 
@@ -349,11 +371,14 @@ function initDaftar() {
 
     if (shareRun) { shareRun.disabled = true; shareRun.textContent = "Membuat PDF..."; }
 
+    const extra_note = shareExtraNote ? shareExtraNote.value.trim() : "";
+
     const r = await api("pdf.generate", {
       id: currentShareId,
       with_kop: useKop ? "1" : "0",
       kop_id,
-      fields
+      fields,
+      extra_note
     }, "Membuat PDF...");
 
     if (shareRun) { shareRun.disabled = false; shareRun.textContent = "Buat & Dapatkan Link"; }
@@ -413,6 +438,12 @@ function initEdit() {
     $("#no_hp").value = c.no_hp || "";
     $("#email").value = c.email || "";
     $("#catatan").value = c.catatan || "";
+    $("#nama_alias").value = c.nama_alias || "";
+    $("#instansi_organisasi").value = c.instansi_organisasi || "";
+    $("#jabatan").value = c.jabatan || "";
+    $("#tanggal_lahir").value = c.tanggal_lahir || "";
+    $("#domisili").value = c.domisili || "";
+    $("#nik").value = c.nik || "";
 
     const prev = $("#fotoPreview");
     if (prev) prev.textContent = c.foto_url ? `Foto tersimpan: ${c.foto_url}` : "Belum ada foto.";
@@ -426,6 +457,13 @@ function initEdit() {
     const no_hp = $("#no_hp")?.value.trim() || "";
     const email = $("#email")?.value.trim() || "";
     const catatan = $("#catatan")?.value.trim() || "";
+
+    const nama_alias = $("#nama_alias")?.value.trim() || "";
+    const instansi_organisasi = $("#instansi_organisasi")?.value.trim() || "";
+    const jabatan = $("#jabatan")?.value.trim() || "";
+    const tanggal_lahir = $("#tanggal_lahir")?.value || "";
+    const domisili = $("#domisili")?.value.trim() || "";
+    const nik = $("#nik")?.value.trim() || "";
 
     if (!nama_lengkap) return warn("Nama lengkap wajib diisi.");
     if (!alamat) return warn("Alamat wajib diisi.");
@@ -441,7 +479,19 @@ function initEdit() {
     if (btn) { btn.disabled = true; btn.textContent = "Menyimpan..."; }
 
     const r = await api("contacts.update", {
-      id, nama_lengkap, alamat, no_hp, email, catatan, foto_data_url
+      id,
+      nama_lengkap,
+      alamat,
+      no_hp,
+      email,
+      catatan, // label UI = Lain-lain
+      nama_alias,
+      instansi_organisasi,
+      jabatan,
+      tanggal_lahir,
+      domisili,
+      nik,
+      foto_data_url
     }, "Menyimpan perubahan...");
 
     if (btn) { btn.disabled = false; btn.textContent = "Simpan Perubahan"; }
@@ -490,6 +540,17 @@ function initKop() {
         </div>
       </div>
     `).join("");
+  }
+
+  const btnNo = $("#btnDefaultNoKop");
+  if (btnNo) {
+    btnNo.addEventListener("click", async () => {
+      if (!confirm("Jadikan default tanpa kop?")) return;
+      const r = await api("kop.clearDefault", {}, "Menyetel default tanpa kop...");
+      if (!r.ok) return;
+      ok("Default diubah: Tanpa Kop.");
+      load();
+    });
   }
 
   form.addEventListener("submit", async (e) => {
@@ -541,4 +602,83 @@ function initKop() {
   });
 
   load();
+}
+
+function initStatus() {
+  const box = $("#statsBox");
+  const btnR = $("#btnRefresh");
+  const btnC = $("#btnCleanup");
+
+  async function render() {
+    if (box) box.textContent = "Loading...";
+    const r = await api("stats.get", {}, "Mengambil statistik...");
+    if (!r.ok) {
+      if (box) box.innerHTML = `<div class="empty">Gagal memuat statistik.</div>`;
+      return;
+    }
+
+    const d = r.data;
+    if (box) {
+      box.innerHTML = `
+        <div class="row"><div class="name">Kontak aktif</div><div>${d.contacts_active}</div></div>
+        <div class="row"><div class="name">Kop aktif</div><div>${d.kop_active}</div></div>
+        <div class="row"><div class="name">PDF hari ini</div><div>${d.pdf_today}</div></div>
+        <div class="row"><div class="name">PDF 7 hari</div><div>${d.pdf_last7}</div></div>
+        <div class="row"><div class="name">Error 7 hari</div><div>${d.errors_last7}</div></div>
+        <div class="row"><div class="name">Rate limit 7 hari</div><div>${d.rate_limit_last7}</div></div>
+        <div class="row"><div class="name">Unauthorized 7 hari</div><div>${d.unauthorized_last7}</div></div>
+        <div class="small">Timezone server: ${esc(d.tz)}</div>
+      `;
+    }
+  }
+
+  if (btnR) btnR.addEventListener("click", render);
+
+  if (btnC) {
+    btnC.addEventListener("click", async () => {
+      const days = $("#daysOld")?.value || "30";
+      if (!confirm(`Cleanup PDF lebih tua dari ${days} hari?`)) return;
+
+      const r = await api("maintenance.cleanupPdfs", { days_old: days }, "Cleanup PDF...");
+      if (!r.ok) return;
+
+      ok(`Cleanup selesai. Files ditrash: ${r.data.trashed}`);
+      render();
+    });
+  }
+
+  render();
+}
+
+function guardLogin_() {
+  const page = document.body.dataset.page || "";
+  if (page === "login") return;
+
+  const st = localStorage.getItem("session_token") || "";
+  if (!st) {
+    const next = encodeURIComponent(location.pathname.split("/").pop() + location.search);
+    location.href = `login.html?next=${next}`;
+  }
+}
+
+function initLogin() {
+  const form = document.querySelector("#formLogin");
+  if (!form) return;
+
+  const next = new URL(location.href).searchParams.get("next") || "index.html";
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const pin = document.querySelector("#pin").value.trim();
+    const r = await apiPost("auth.login", { pin });
+
+    if (!r.ok) {
+      alert("PIN salah.");
+      return;
+    }
+
+    localStorage.setItem("session_token", r.data.session_token);
+    location.href = next;
+  });
 }

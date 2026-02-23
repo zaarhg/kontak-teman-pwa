@@ -1,37 +1,46 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kop Surat</title>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b5cff">
-</head>
-<body data-page="kop">
-  <h1>Kop Surat</h1>
 
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body data-page="kop">
+
+  <h2>Kop Surat</h2>
+
+  <div style="display:flex; gap:10px; margin:10px 0 16px;">
+    <button id="btnDefaultNoKop" type="button" style="width:auto;">
+      Jadikan Default: Tanpa Kop
+    </button>
+    <button type="button" onclick="location.href='index.html'" style="width:auto;">
+      Kembali
+    </button>
+  </div>
+
+  <div id="kopList" class="empty">Loading...</div>
+
+  <hr style="margin:18px 0;">
+
+  <h3>Tambah Kop</h3>
   <form id="formKop">
     <label>Nama Instansi</label>
-    <input id="nama_instansi" required>
+    <input id="nama_instansi" placeholder="Contoh: Fakultas Teknik" required>
 
-    <label>Link Google Docs (kop)</label>
-    <input id="link_google_docs" required>
+    <label>Link Google Docs (Kop Surat)</label>
+    <input id="link_google_docs" placeholder="https://docs.google.com/document/d/..." required>
 
     <button id="btnTambahKop" type="submit">Tambah Kop</button>
   </form>
 
-  <hr/>
-  <div id="kopList"></div>
+  <p class="small" style="opacity:.75;">
+    Catatan: gunakan margin Google Docs bawaan agar kop tidak terpotong (atas: 2.54 cm).
+  </p>
 
   <script src="assets/js/api.js"></script>
   <script src="assets/js/app.js"></script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./service-worker.js");
-    }
-  </script>
-
 </body>
 </html>
