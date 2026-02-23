@@ -18,50 +18,45 @@
 
   <style>
     .home-wrap {
-      margin-top: 8px;
+      margin-top: 6px;
     }
 
-    .hero-soft {
+    .home-head {
       position: relative;
-      overflow: hidden;
-      padding: 18px 16px;
-      border-radius: 20px;
-      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(248,251,255,.95));
-      border: 1px solid rgba(207, 216, 230, .9);
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-      margin-bottom: 14px;
+      padding: 6px 2px 4px;
+      margin-bottom: 12px;
     }
 
-    .hero-soft::before,
-    .hero-soft::after {
+    .home-head::before,
+    .home-head::after {
       content: "";
       position: absolute;
       border-radius: 999px;
       pointer-events: none;
-      filter: blur(2px);
-      opacity: .7;
+      z-index: -1;
+      opacity: .8;
     }
 
-    .hero-soft::before {
+    .home-head::before {
       width: 120px;
       height: 120px;
-      top: -40px;
-      right: -25px;
-      background: radial-gradient(circle, rgba(59,130,246,.18), rgba(59,130,246,0));
+      top: -18px;
+      right: -12px;
+      background: radial-gradient(circle, rgba(59,130,246,.12), rgba(59,130,246,0));
     }
 
-    .hero-soft::after {
-      width: 110px;
-      height: 110px;
-      left: -30px;
-      bottom: -35px;
-      background: radial-gradient(circle, rgba(14,165,233,.14), rgba(14,165,233,0));
+    .home-head::after {
+      width: 100px;
+      height: 100px;
+      left: -18px;
+      top: 8px;
+      background: radial-gradient(circle, rgba(14,165,233,.10), rgba(14,165,233,0));
     }
 
     .app-title {
       margin: 0;
       text-align: left;
-      font-size: 1.35rem;
+      font-size: 1.45rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       color: #0f172a;
@@ -75,26 +70,11 @@
       line-height: 1.45;
     }
 
-    .home-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 10px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid #dbe5f4;
-      background: rgba(255,255,255,.8);
-      color: #334155;
-      font-size: 12px;
-      font-weight: 600;
-      backdrop-filter: blur(2px);
-    }
-
     .menu-container {
       display: grid;
       grid-template-columns: 1fr;
       gap: 12px;
-      margin-top: 12px;
+      margin-top: 10px;
     }
 
     .menu-card {
@@ -230,13 +210,12 @@
     }
 
     @media (min-width: 640px) {
-      .hero-soft {
-        padding: 20px 18px;
-        margin-bottom: 16px;
+      .home-head {
+        margin-bottom: 14px;
       }
 
       .app-title {
-        font-size: 1.55rem;
+        font-size: 1.65rem;
       }
 
       .app-sub {
@@ -281,10 +260,9 @@
 <body data-page="index">
 
   <div class="home-wrap">
-    <div class="hero-soft">
+    <div class="home-head">
       <h1 class="app-title">Kontak Teman</h1>
       <div class="app-sub">Kelola data kontak dan bagikan dalam bentuk PDF dengan tampilan yang rapi.</div>
-      <div class="home-badge">📱 PWA • Mobile Friendly</div>
     </div>
 
     <div class="menu-container">
@@ -325,7 +303,7 @@
       </div>
     </div>
 
-    <div class="home-footer-note">Versi mobile diutamakan, tetap nyaman dibuka di desktop.</div>
+    <div class="home-footer-note">Dibuat dengan senyuman 😊 dan secangkir kopi ☕ by az</div>
   </div>
 
   <script>
